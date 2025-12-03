@@ -1,28 +1,34 @@
-pipeline{
-    agent any
-        stages{
-            stage("Build"){
-                steps{
-                echo " Build docker image"
-                bat "docker build -t spandanakonda/myapp:v1 ."
-                }
-            }
-            stage("Run"){
-                steps{
-                    echo "run application in container"
-                    bat "docker rm -f mycontainer|| exit 0"
-                    bat "docker run -d -p 5000:5000 --name mycontainer spandanakonda/myapp:v1"
-                }
+pipeline {
+ agent any
+ stages {
+ stage('Build') {
+ steps {
+ echo "Build Docker Image"
+ bat "docker build -t mypythonflaskapp ."
+ }
+ }
+ stage('Run') {
+ steps {
+ echo "Run application in Docker Container"
+ bat "docker rm -f mycontainer || exit 0"
+ //forcibly removes the Docker container named mycontainer
+ //If the container does not exist, this command will fail and return anerror
+ //if fails execute exit 0, tells the shell to exit with a success status
 
-            }
-        }
-        post{
-            success{
-                echo "success"
-            }
-            failure{
-                echo "faillll"
-            }
-        }
-    
+ bat "docker run -d -p 5000:5000 --name mycontainer mypythonflaskapp"
+ //with -d runs the container in detached mode,
+ //meaning it runs in the background, and you get your terminal backimmediately.
+ //Without -d runs in the foreground,
+ //terminal shows container logs and is “blocked” by the containerprocess.
+ }
+ }
+ }
+ post {
+ success {
+ echo 'Pipeline completed successfully!'
+ }
+ failure {
+    echo 'Pipeline failed. Please check the logs.'
+ }
+ }
 }
